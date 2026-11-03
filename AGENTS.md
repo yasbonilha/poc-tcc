@@ -39,3 +39,18 @@ Docs: https://docs.expo.dev/eas/index.md
 - If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
 - Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
+
+## Convenções desse projeto
+- Não altere arquivos fora do escopo pedido. Explique cada alteração.
+- Componentes ficam em `components/`, um arquivo por componente.
+- Estado nunca é modificado no lugar: sempre gere um novo valor.
+- Valores que podem ser calculados a partir do estado não viram estado.
+- Antes de usar um pacote, confirme na documentação se ele funciona no Expo Go.
+
+## Contexto desta prova de conceito
+- TCC: treinamento de uma PINN (rede neural orienntada pela física) para complementar a análise de escoamento do ar no Telescópio Gigante de Magalhães.
+- Problema: como podemos fazer com que os dados de treino possam ser checados periodicamente para análise durante o treino?
+- Tecnologia investigada: a biblioteca TanStackQuery para chamadas periódicas a uma fonte de dados.
+- Uma tela só, em `App.tsx`: o usuário consegue visualizar a curva de loss total e suas componentes, erro de validação, número de época ou iteração, tempo de treinamento e taxa de aprendizado, além do histórico das métricas ao longo do tempo. Primeiramente, ele recebe dadoos simulados, mas a estrutura é a mesma de quando houver uma requisição.
+- Não usar Expo Router, a menos que a tecnologia investigada seja a navegação.
+- Fora de escopo: login, design final e tudo que não demonstre a pergunta.
