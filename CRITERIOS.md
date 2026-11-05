@@ -11,3 +11,4 @@
 
 # Onde a IA errou 
 - Citou uma integração entre o Expo e o TanStackQuery no site oficial do Expo que não existia;
+- modificou o arquivo de critérios.
