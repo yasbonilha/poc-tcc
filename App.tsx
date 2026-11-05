@@ -24,8 +24,12 @@ const queryClient = new QueryClient({
   },
 });
 
-async function fetchTrainingMetrics(): Promise<TrainingMetrics> {
+async function fetchTrainingMetrics(simulateFailure: boolean): Promise<TrainingMetrics> {
   await new Promise<void>((resolve) => setTimeout(resolve, 250));
+
+  if (simulateFailure) {
+    throw new Error('Falha simulada: não foi possível obter os dados do treino.');
+  }
 
   const elapsedSeconds = Math.floor((Date.now() - trainingStartedAt) / 1000);
   const epoch = Math.floor((Date.now() - trainingStartedAt) / pollingIntervalMs) + 1;
@@ -59,11 +63,29 @@ function MetricCard({ label, value, detail }: { label: string; value: string; de
   );
 }
 
+function SimulationControl({
+  isFailureSimulated,
+  onToggle,
+}: {
+  isFailureSimulated: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <View style={styles.simulationControl}>
+      <Text style={styles.simulationLabel}>Teste de falha na consulta</Text>
+      <Text accessibilityRole="button" onPress={onToggle} style={styles.simulationButton}>
+        {isFailureSimulated ? 'Desativar falha' : 'Simular falha'}
+      </Text>
+    </View>
+  );
+}
+
 function TrainingDashboard() {
   const [history, setHistory] = useState<TrainingMetrics[]>([]);
+  const [isFailureSimulated, setIsFailureSimulated] = useState(false);
   const { data, error, isError, isPending, isFetching, refetch } = useQuery({
-    queryKey: ['training-metrics'],
-    queryFn: fetchTrainingMetrics,
+    queryKey: ['training-metrics', isFailureSimulated],
+    queryFn: () => fetchTrainingMetrics(isFailureSimulated),
     refetchInterval: pollingIntervalMs,
     refetchIntervalInBackground: false,
     refetchOnMount: 'always',
@@ -107,6 +129,10 @@ function TrainingDashboard() {
       <View style={styles.centeredState}>
         <Text style={styles.loadingTitle}>Conectando ao treino</Text>
         <Text style={styles.loadingMessage}>Buscando as métricas mais recentes...</Text>
+        <SimulationControl
+          isFailureSimulated={isFailureSimulated}
+          onToggle={() => setIsFailureSimulated((previous) => !previous)}
+        />
       </View>
     );
   }
@@ -119,6 +145,10 @@ function TrainingDashboard() {
         <Text accessibilityRole="button" onPress={() => refetch()} style={styles.retryButton}>
           Tentar novamente
         </Text>
+        <SimulationControl
+          isFailureSimulated={isFailureSimulated}
+          onToggle={() => setIsFailureSimulated((previous) => !previous)}
+        />
       </View>
     );
   }
@@ -136,6 +166,11 @@ function TrainingDashboard() {
           <Text style={styles.liveLabel}>{isFetching ? 'ATUALIZANDO' : 'AO VIVO'}</Text>
         </View>
       </View>
+
+      <SimulationControl
+        isFailureSimulated={isFailureSimulated}
+        onToggle={() => setIsFailureSimulated((previous) => !previous)}
+      />
 
       {isError && (
         <View style={styles.inlineError}>
@@ -441,6 +476,25 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginTop: 20,
     padding: 10,
+  },
+  simulationControl: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 18,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    width: '100%',
+  },
+  simulationLabel: {
+    color: '#8792a8',
+    fontSize: 11,
+  },
+  simulationButton: {
+    color: '#7de0be',
+    fontSize: 12,
+    fontWeight: '700',
+    padding: 8,
   },
   inlineError: {
     backgroundColor: '#341d26',
